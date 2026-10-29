@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پلتفرم هوشمند تشخیص و تحلیل خطر دیابت</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Vazirmatn -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Vazirmatn', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            900: '#064e3b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+
+        input[type=range]:focus {
+            outline: none;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 10px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #0d9488;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -7px;
+            box-shadow: 0 4px 10px rgba(13, 148, 136, 0.4);
+            border: 3px solid #ffffff;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: #0f766e;
+        }
+
+        /* Gauge Progress Arc */
+        .gauge-circle {
+            transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Glassmorphism elements */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+
+        <!-- Header -->
+        <header class="glass-card rounded-3xl p-6 md:p-8 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-200/80">
+            <div class="flex items-center gap-5">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-teal-600 to-emerald-400 text-white flex items-center justify-center shadow-lg shadow-teal-500/30">
+                    <i data-lucide="activity" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">سامانه هوشمند تشخیص و ارزیابی دیابت</h1>
+                    <p class="text-sm text-slate-500 font-medium mt-1">بر پایه مدل درخت تصمیم آماری (Decision Tree SPSS Model)</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 bg-teal-50/80 border border-teal-200/60 text-teal-800 px-4 py-2.5 rounded-full text-xs font-semibold">
+                <span class="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse"></span>
+                پردازش زنده و آنی اطلاعات
+            </div>
+        </header>
+
+        <!-- Main Content Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Inputs Column (Sliders) -->
+            <div class="lg:col-span-7 space-y-5">
+                
+                <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
+                            <i data-lucide="sliders" class="w-5 h-5 text-teal-600"></i>
+                            <span>پارامترها و شاخص‌های بالینی</span>
+                        </div>
+                        <button onclick="resetValues()" class="text-xs font-medium text-slate-400 hover:text-teal-600 transition-colors flex items-center gap-1">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            بازنشانی
+                        </button>
+                    </div>
+
+                    <!-- 1. Glucose -->
+                    <div class="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-100 hover:border-teal-200 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <label for="glucoseInput" class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <i data-lucide="droplet" class="w-4 h-4 text-rose-500"></i>
+                                قند خون (Glucose)
+                            </label>
+                            <div class="flex items-center gap-1 bg-white px-3 py-1 rounded-xl shadow-sm border border-slate-200">
+                                <input type="number" id="glucoseInput" min="0" max="250" value="120" step="1" 
+                                    class="w-16 text-left text-sm font-bold text-teal-700 outline-none" oninput="syncInput('glucose', this.value)">
+                                <span class="text-xs text-slate-400 font-medium">mg/dL</span>
+                            </div>
+                        </div>
+                        <input type="range" id="glucoseSlider" min="0" max="250" value="120" step="1" oninput="syncSlider('glucose', this.value)">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                            <span>0</span>
+                            <span class="text-teal-600 font-semibold">مرز آستانه اصلی: 154</span>
+                            <span>250</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. Age -->
+                    <div class="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-100 hover:border-teal-200 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <label for="ageInput" class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <i data-lucide="user" class="w-4 h-4 text-blue-500"></i>
+                                سن (Age)
+                            </label>
+                            <div class="flex items-center gap-1 bg-white px-3 py-1 rounded-xl shadow-sm border border-slate-200">
+                                <input type="number" id="ageInput" min="10" max="100" value="35" step="1" 
+                                    class="w-16 text-left text-sm font-bold text-teal-700 outline-none" oninput="syncInput('age', this.value)">
+                                <span class="text-xs text-slate-400 font-medium">سال</span>
+                            </div>
+                        </div>
+                        <input type="range" id="ageSlider" min="10" max="100" value="35" step="1" oninput="syncSlider('age', this.value)">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                            <span>10 سال</span>
+                            <span class="text-teal-600 font-semibold">مرز آستانه: 29 سال</span>
+                            <span>100 سال</span>
+                        </div>
+                    </div>
+
+                    <!-- 3. BMI -->
+                    <div class="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-100 hover:border-teal-200 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <label for="bmiInput" class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <i data-lucide="scale" class="w-4 h-4 text-amber-500"></i>
+                                شاخص توده بدنی (BMI)
+                            </label>
+                            <div class="flex items-center gap-1 bg-white px-3 py-1 rounded-xl shadow-sm border border-slate-200">
+                                <input type="number" id="bmiInput" min="10.0" max="60.0" value="28.5" step="0.1" 
+                                    class="w-16 text-left text-sm font-bold text-teal-700 outline-none" oninput="syncInput('bmi', this.value)">
+                                <span class="text-xs text-slate-400 font-medium">kg/m²</span>
+                            </div>
+                        </div>
+                        <input type="range" id="bmiSlider" min="10.0" max="60.0" value="28.5" step="0.1" oninput="syncSlider('bmi', this.value)">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                            <span>10.0</span>
+                            <span class="text-teal-600 font-semibold">آستانه‌ها: 26.7 | 43.3</span>
+                            <span>60.0</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. Diabetes Pedigree Function (DPF) -->
+                    <div class="space-y-3 bg-slate-50/70 p-4 rounded-2xl border border-slate-100 hover:border-teal-200 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <label for="dpfInput" class="flex items-center gap-2 text-sm font-bold text-slate-700">
+                                <i data-lucide="dna" class="w-4 h-4 text-purple-500"></i>
+                                سابقه ژنتیک (DPF)
+                            </label>
+                            <div class="flex items-center gap-1 bg-white px-3 py-1 rounded-xl shadow-sm border border-slate-200">
+                                <input type="number" id="dpfInput" min="0.000" max="2.500" value="0.450" step="0.001" 
+                                    class="w-16 text-left text-sm font-bold text-teal-700 outline-none" oninput="syncInput('dpf', this.value)">
+                                <span class="text-xs text-slate-400 font-medium">شاخص</span>
+                            </div>
+                        </div>
+                        <input type="range" id="dpfSlider" min="0.000" max="2.500" value="0.450" step="0.001" oninput="syncSlider('dpf', this.value)">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-medium">
+                            <span>0.000</span>
+                            <span class="text-teal-600 font-semibold">آستانه‌ها: 0.287 | 0.307 | 0.464 | 0.709</span>
+                            <span>2.500</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Analysis & Result Column -->
+            <div class="lg:col-span-5 space-y-5">
+                
+                <!-- Result Gauge Card -->
+                <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                    
+                    <h2 class="text-base font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        <i data-lucide="pie-chart" class="w-5 h-5 text-teal-600"></i>
+                        نتیجه ارزیابی الگوریتم
+                    </h2>
+
+                    <!-- Radial Gauge SVG -->
+                    <div class="relative w-48 h-48 my-2">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                            <!-- Background Circle -->
+                            <circle cx="50" cy="50" r="40" stroke="#f1f5f9" stroke-width="10" fill="transparent" />
+                            <!-- Progress Arc -->
+                            <circle id="gaugeArc" class="gauge-circle" cx="50" cy="50" r="40" stroke="#10b981" stroke-width="10" 
+                                stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" fill="transparent" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="riskBadge" class="text-3xl font-black transition-colors duration-300">0%</span>
+                            <span id="riskLabel" class="text-xs font-bold text-slate-500 mt-1">کم خطر</span>
+                        </div>
+                    </div>
+
+                    <!-- Status Banner -->
+                    <div id="statusBox" class="w-full p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 transition-all duration-300">
+                        <div class="font-extrabold text-lg flex items-center justify-center gap-2" id="statusTitle">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                            وضعیت: طبیعی (عدم ابتلا)
+                        </div>
+                        <p class="text-xs mt-1 leading-relaxed opacity-90" id="statusDesc">
+                            شاخص‌های وارد شده بر اساس منطق درخت تصمیم در محدوده کم‌خطر قرار دارند.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Tree Path Visualizer Card -->
+                <div class="glass-card rounded-3xl p-6 shadow-xl border border-slate-200/80 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                            <i data-lucide="git-branch" class="w-4 h-4 text-teal-600"></i>
+                            مسیر تصمیم‌گیری درخت SPSS
+                        </h3>
+                        <span class="text-[10px] font-semibold bg-slate-100 text-slate-500 px-2 py-1 rounded-md">منطق بردارها</span>
+                    </div>
+
+                    <div id="treePathContainer" class="space-y-2 text-xs font-medium">
+                        <!-- Dynamic Tree nodes populated by JavaScript -->
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Reference Guide Footer Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/70 shadow-sm">
+                <div class="flex items-center gap-2 text-rose-600 font-bold text-xs mb-1">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    گلوکز (قند خون)
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    ناشتا: ۷۰ تا ۹۹ mg/dL طبیعی است. بالای ۱۲۶ mg/dL نیاز به بررسی پزشکی دارد.
+                </p>
+            </div>
+
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/70 shadow-sm">
+                <div class="flex items-center gap-2 text-amber-600 font-bold text-xs mb-1">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    شاخص BMI
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    ۱۸.۵ تا ۲۴.۹ وزن نرمال، ۲۵ تا ۲۹.۹ اضافه وزن و بالای ۳۰ نشان‌دهنده چاقی است.
+                </p>
+            </div>
+
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/70 shadow-sm">
+                <div class="flex items-center gap-2 text-purple-600 font-bold text-xs mb-1">
+                    <i data-lucide="info" class="w-4 h-4"></i>
+                    شاخص DPF
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    میزان سابقه دیابت در اقوام درجه یک و دو را نشان می‌دهد (مقادیر بالاتر = ریسک ژنتیکی بیشتر).
+                </p>
+            </div>
+
+            <div class="bg-white/70 backdrop-blur-sm p-4 rounded-2xl border border-slate-200/70 shadow-sm">
+                <div class="flex items-center gap-2 text-blue-600 font-bold text-xs mb-1">
+                    <i data-lucide="shield-alert" class="w-4 h-4"></i>
+                    بیانیه سلب مسئولیت
+                </div>
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                    این ابزار صرفاً یک مدل شبیه‌ساز آماری بوده و جایگزین تشخيص و نظر پزشک متخصص نیست.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // State management
+        const state = {
+            glucose: 120,
+            age: 35,
+            bmi: 28.5,
+            dpf: 0.450
+        };
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Sync functions
+        function syncSlider(key, val) {
+            const numericVal = parseFloat(val);
+            state[key] = numericVal;
+            document.getElementById(`${key}Input`).value = val;
+            runDecisionTree();
+        }
+
+        function syncInput(key, val) {
+            let numericVal = parseFloat(val);
+            if (isNaN(numericVal)) numericVal = 0;
+            state[key] = numericVal;
+            document.getElementById(`${key}Slider`).value = numericVal;
+            runDecisionTree();
+        }
+
+        function resetValues() {
+            state.glucose = 120;
+            state.age = 35;
+            state.bmi = 28.5;
+            state.dpf = 0.450;
+
+            document.getElementById('glucoseSlider').value = 120;
+            document.getElementById('glucoseInput').value = 120;
+            document.getElementById('ageSlider').value = 35;
+            document.getElementById('ageInput').value = 35;
+            document.getElementById('bmiSlider').value = 28.5;
+            document.getElementById('bmiInput').value = 28.5;
+            document.getElementById('dpfSlider').value = 0.450;
+            document.getElementById('dpfInput').value = 0.450;
+
+            runDecisionTree();
+        }
+
+        // Decision Tree Logic based on SPSS tree output
+        function evaluateTree(glucose, age, bmi, dpf) {
+            const steps = [];
+            let mode = 0; // 0 = Negative, 1 = Positive
+
+            if (glucose <= 154) {
+                steps.push({ text: `Glucose <= 154 (${glucose})`, matched: true });
+                if (age <= 29) {
+                    steps.push({ text: `Age <= 29 (${age})`, matched: true });
+                    mode = 0.0;
+                } else {
+                    steps.push({ text: `Age > 29 (${age})`, matched: true });
+                    if (bmi <= 26.700) {
+                        steps.push({ text: `BMI <= 26.700 (${bmi})`, matched: true });
+                        mode = 0.0;
+                    } else {
+                        steps.push({ text: `BMI > 26.700 (${bmi})`, matched: true });
+                        if (glucose <= 101) {
+                            steps.push({ text: `Glucose <= 101 (${glucose})`, matched: true });
+                            if (dpf <= 0.709) {
+                                steps.push({ text: `DPF <= 0.709 (${dpf})`, matched: true });
+                                mode = 0.0;
+                            } else {
+                                steps.push({ text: `DPF > 0.709 (${dpf})`, matched: true });
+                                mode = 1.0;
+                            }
+                        } else {
+                            steps.push({ text: `Glucose > 101 (${glucose})`, matched: true });
+                            if (bmi <= 43.300) {
+                                steps.push({ text: `BMI <= 43.300 (${bmi})`, matched: true });
+                                if (dpf <= 0.464) {
+                                    steps.push({ text: `DPF <= 0.464 (${dpf})`, matched: true });
+                                    mode = 0.0;
+                                } else {
+                                    steps.push({ text: `DPF > 0.464 (${dpf})`, matched: true });
+                                    mode = 1.0;
+                                }
+                            } else {
+                                steps.push({ text: `BMI > 43.300 (${bmi})`, matched: true });
+                                mode = 1.0;
+                            }
+                        }
+                    }
+                }
+            } else {
+                steps.push({ text: `Glucose > 154 (${glucose})`, matched: true });
+                if (dpf <= 0.307) {
+                    steps.push({ text: `DPF <= 0.307 (${dpf})`, matched: true });
+                    if (dpf <= 0.287) {
+                        steps.push({ text: `DPF <= 0.287 (${dpf})`, matched: true });
+                        mode = 1.0;
+                    } else {
+                        steps.push({ text: `DPF > 0.287 (${dpf})`, matched: true });
+                        mode = 0.0;
+                    }
+                } else {
+                    steps.push({ text: `DPF > 0.307 (${dpf})`, matched: true });
+                    mode = 1.0;
+                }
+            }
+
+            return { isPositive: mode === 1.0, steps };
+        }
+
+        function runDecisionTree() {
+            const { isPositive, steps } = evaluateTree(state.glucose, state.age, state.bmi, state.dpf);
+
+            // Update Gauge Arc (Circumference of r=40 is ~251.2)
+            const gaugeArc = document.getElementById('gaugeArc');
+            const riskBadge = document.getElementById('riskBadge');
+            const riskLabel = document.getElementById('riskLabel');
+
+            const statusBox = document.getElementById('statusBox');
+            const statusTitle = document.getElementById('statusTitle');
+            const statusDesc = document.getElementById('statusDesc');
+
+            if (isPositive) {
+                // High risk
+                gaugeArc.style.strokeDashoffset = "25.1"; // 90% full
+                gaugeArc.setAttribute('stroke', '#ef4444'); // red
+                riskBadge.textContent = 'دیابتی';
+                riskBadge.className = 'text-3xl font-black text-rose-600';
+                riskLabel.textContent = 'ریسک بالا (Mode 1)';
+
+                statusBox.className = 'w-full p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 transition-all duration-300';
+                statusTitle.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> وضعیت: احتمال ابتلا بالا`;
+                statusDesc.textContent = 'بر اساس داده‌های ارزیابی و درخت تصمیم، شاخص‌های شما متناظر با الگوی ابتلای دیابت گزارش شده است.';
+            } else {
+                // Low risk
+                gaugeArc.style.strokeDashoffset = "200.9"; // 20% full
+                gaugeArc.setAttribute('stroke', '#10b981'); // green
+                riskBadge.textContent = 'سالم';
+                riskBadge.className = 'text-3xl font-black text-emerald-600';
+                riskLabel.textContent = 'ریسک پایین (Mode 0)';
+
+                statusBox.className = 'w-full p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 transition-all duration-300';
+                statusTitle.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5"></i> وضعیت: طبیعی (عدم ابتلا)`;
+                statusDesc.textContent = 'بر اساس داده‌های ارزیابی، شاخص‌های بالینی شما در محدوده طبیعی و سلامت طبق الگوریتم قرار دارند.';
+            }
+
+            // Render path tree steps
+            const treePathContainer = document.getElementById('treePathContainer');
+            treePathContainer.innerHTML = '';
+
+            steps.forEach((step, index) => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = `flex items-center gap-2 p-2 rounded-xl ${
+                    index === steps.length - 1 
+                        ? (isPositive ? 'bg-rose-100/70 text-rose-900 font-bold border border-rose-200' : 'bg-emerald-100/70 text-emerald-900 font-bold border border-emerald-200') 
+                        : 'bg-white/60 text-slate-600 border border-slate-100'
+                }`;
+
+                nodeEl.innerHTML = `
+                    <span class="w-5 h-5 rounded-full ${isPositive && index === steps.length - 1 ? 'bg-rose-500' : 'bg-teal-600'} text-white flex items-center justify-center text-[10px] font-bold">
+                        ${index + 1}
+                    </span>
+                    <span>${step.text}</span>
+                `;
+                treePathContainer.appendChild(nodeEl);
+            });
+
+            lucide.createIcons();
+        }
+
+        // Run initially on page load
+        window.onload = function() {
+            runDecisionTree();
+        };
+    </script>
+</body>
+</html>
